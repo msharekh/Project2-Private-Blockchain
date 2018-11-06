@@ -8,6 +8,15 @@
 |  =======================================================================*/
 
 
+/*
+Requirement 1	Configure LevelDB to persist dataset
+Requirement 2	Modify simpleChain.js functions to persist data with LevelDB
+Requirement 3	Modify getBlock() function
+Requirement 4	Modify getBlockHeight() function
+Requirement 5	Modify validate functions
+*/
+
+
 /******* Your project will be evaluated using the Project Rubric ********/
 /*
 1.
@@ -17,6 +26,10 @@ SimpleChain.js includes the Node.js level library and configured to persist data
 2.
 addBlock(newBlock) function includes a method to store newBlock with LevelDB.
 addBlock(newBlock) includes a method to store newBlock within LevelDB
+
+    addLevelDBData(key,value)
+    addDataToLevelDB(value)
+    getLevelDBData(key)
 
 3.
 Genesis block persist as the first block in the blockchain using LevelDB
@@ -29,6 +42,17 @@ Additionally, when adding a new block to the chain, code checks if a Genesis blo
 |  Learn more: Crypto-js: https://github.com/brix/crypto-js      |
 |  =============================================================*/
 const SHA256 = require('crypto-js/sha256');
+
+/*---(1)---*/
+// const level = require('level');
+// const chainDB = './chaindata';
+// const db = level(chainDB);
+
+//Importing levelSandbox class
+const LevelSandboxClass = require('./levelSandbox.js');
+
+// Creating the levelSandbox class object
+const db = new LevelSandboxClass.LevelSandbox();
 
 /* ===== Block Class ===================================
 |  Class with a constructor for block data model       |
@@ -63,11 +87,14 @@ class BlockChain{
    }
    newBlock.hash = SHA256(JSON.stringify(newBlock)).toString();
    this.chain.push(newBlock);
+
+  /*------------- LevelDB -------------*/
+   addDataToLevelDB(newBlock.height, JSON.stringify(newBlock).toString());
  }
 }
 
 //testing:
-let blockchain = new BlockChain();
-blockchain.addBlock(new Block('second block'));
-blockchain.chain
+//let blockchain = new BlockChain();
+//blockchain.addBlock(new Block('second block'));
+//blockchain.chain
 //console.log(' resutl: '+ blockchain.chain);
