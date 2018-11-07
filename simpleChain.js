@@ -65,10 +65,7 @@ function addLevelDBData(key,value){
       }       
     });
 
-    var k = 5;
-    db.get(key,function(err,v){
-      console.log('block value ='+ v);
-    });
+    
 
   // });
 }
@@ -86,6 +83,8 @@ function getLevelDBData(key){
       db.createReadStream()
       .on('data', function (data) {
         console.log(data.key, '=', data.value)
+        console.log('key=' + data.key +' value ='+ data.value)
+
         cnt++;
       })
       .on('error', function (err) {
@@ -208,6 +207,11 @@ class BlockChain{
     console.log('LevelDB Block #' + i);
     addLevelDBData(i, newBlock);
     });
+
+    var k = 0;
+    db.get(k,function(err,v){
+      console.log('block '+k+' ............. value ='+ v);
+    });
  }
 
 /*################################################
@@ -240,8 +244,9 @@ getBlock(blockHeight){
       //Returns a Readable Stream of keys
        db.createReadStream()
       .on('data', function (data) {
-        console.log(data.key, '=', data.value)
-        console.log('key=', data)
+        // console.log(data.key, '=', data.value)
+        // console.log('key=', data)
+        console.log('key=' + data.key +' value ='+ data.value)
 
         cnt++;
       })
@@ -341,7 +346,7 @@ validateChain(){
 
 //5: Generate 10 blocks using a for loop
 let bc = new BlockChain();
-for (var i = 0; i <= 10; i++) {
+for (var i = 0; i <= 3; i++) {
   bc.addBlock(new Block("test data "+i));
 }
 
