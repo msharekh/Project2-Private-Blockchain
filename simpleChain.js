@@ -52,7 +52,7 @@ const SHA256 = require('crypto-js/sha256');
 const level = require('level');
 const chainDB = './chaindata';
 const db = level(chainDB);
-
+  
 
 // Add data to levelDB with value
 function addDataToLevelDB(newBlock) {
@@ -146,7 +146,7 @@ class Block{
 class BlockChain{
   constructor(){
     this.chain = [];
-    this.addBlock(new Block('First block in chain'));
+    //this.addBlock(new Block('First block in chain'));
   }
   
   
@@ -156,13 +156,14 @@ class BlockChain{
   addBlock(newBlock){
     
     // Block height
-    newBlock.height = this.chain.length;
-    // UTC timestamp
+    newBlock.height = bc.getBlockHeight();
+
+     // UTC timestamp
     newBlock.time = new Date().getTime().toString().slice(0,-3);
     
     // previous block hash
-    if(this.chain.length > 0){
-      newBlock.previousblockhash = this.chain[this.chain.length-1].hash;
+    if(bc.getBlockHeight() > 0){
+      newBlock.previousblockhash = bc.getBlock(bc.getBlockHeight()-1).hash;
     }
     
     // Block hash with SHA256 using newBlock and converting to a string
@@ -198,14 +199,10 @@ class BlockChain{
     /******* BlockChain Array ********/ 
     //return JSON.parse(JSON.stringify(this.chain[blockHeight]));
     
-    /******* LEVELDB ********/
-    
-    
-    
-      
+    /******* LEVELDB ********/    
+          
       return getLevelDBData(blockHeight).then((data) => {  console.log(data); });
-       
-      
+             
       // db.get(blockHeight, function(err, value) {
       //   if (err) return console.log('block not found!', err);
       //   resolve(value);
@@ -225,21 +222,22 @@ class BlockChain{
     /******* BlockChain Array ********/    
     //return this.chain.length-1;
     
-    /******* LEVELDB ********/    
-    
-    var cnt=0;
+    /******* LEVELDB ********/   
+    let bc = new BlockChain();
+
+    return bc.getCreateReadStream().then((data) => {  console.log(data); });   
+       
+  }
+  
+  getCreateReadStream(){
+    var BlockHeight=0;
     return new Promise((resolve, reject) => {
-      
-      
-      
-        //getLevelDBData(blockHeight) 
-        
-        var cnt=0;
-        
+                   
+         
         //Returns a Readable Stream of keys
         db.createReadStream()
         .on('data', function (data) { 
-          cnt++;
+          BlockHeight++;
         })
         .on('error', function (err) {
           console.log('Oh my!', err)
@@ -249,17 +247,11 @@ class BlockChain{
         })
         .on('end', function () {
           // C console.log('Stream ended')
-          resolve(cnt);
+          resolve(BlockHeight);
         }); 
-        
-        
-      
-         
+                
     }); 
-       
   }
-  
-  
   
   
   /*################################################
@@ -409,10 +401,7 @@ readBlockChainDB() {
     let cnt=0;
     db.createReadStream()
         .on('data', function (data) {
-          // C console.log(data.key, '=', data.value)
-          
-          cnt++;
-          //return console.log('data cnt=' + cnt +' key=' + data.key +' value ='+ data.value+'\n')
+          return console.log('data cnt=' + cnt +' key=' + data.key +' value ='+ data.value+'\n')
         })
         .on('error', function (err) {
           console.log('Oh my!', err)
@@ -477,6 +466,13 @@ validateChain(){
 // }
 
 let bc = new BlockChain();
+
+//GenesisBlock
+let GenesisBlock  = new Block("First block in chain -Genesis Block - " + 0);
+bc.addBlock(GenesisBlock).then((result) => {
+  console.log(result);   
+});
+
 i=0;
 (function theLoop (i) {
   setTimeout(function () {

@@ -11,6 +11,30 @@ addBlock(newBlock){
             console.log(result);
         })
 
-        bc.getBlock(2).then((data) => {  console.log('hash='+ JSON.parse(data).hash); });
+==========================================================================================
 
-        bc.getBlockHeight().then((result) => {  console.log(result); });
+getBlock(blockHeight){
+    // return object as a single string
+    /******* BlockChain Array ********/ 
+    //return JSON.parse(JSON.stringify(this.chain[blockHeight]));
+    
+    /******* LEVELDB ********/    
+          
+      return getLevelDBData(blockHeight).then((data) => {  console.log(data); });
+}           
+
+        bc.getBlock(2) 
+==========================================================================================
+getBlockHeight(){
+    return bc.getCreateReadStream().then((data) => {  console.log(data); });   
+
+    getCreateReadStream(){
+
+        db.createReadStream()...
+}
+    bc.getBlockHeight()
+
+ ==========================================================================================
+ readBlockChainDB() {
+
+    bc.readBlockChainDB().then((result) => {console.log(result);  });
