@@ -53,15 +53,40 @@ const level = require('level');
 const chainDB = './chaindata';
 const db = level(chainDB);
 
+
+// Add data to levelDB with value
+function addDataToLevelDB(newBlock) {
+  let i = 0;  
+
+    db.createReadStream()
+      .on('data', function(data) {
+      i++;
+      // return console.log('addDataToLevelDB data -Block #' + i);
+    }).on('error', function(err) {
+        console.log('addDataToLevelDB erro -Block #' + i);
+        return console.log('Unable to read data stream!', err)
+    }).on('end', function() {
+      // C console.log('addDataToLevelDB end -Block #' + i);
+      //console.log('LevelDB Block #' + i);
+      //addLevelDBData(i, newBlock);
+    }).on('close', function() {
+      // C console.log('addDataToLevelDB close -Block #' + i);
+      //console.log('LevelDB Block #' + i);
+      addLevelDBData(i, newBlock);
+      //return(i);
+    });
+  
+}
+
 // Add data to levelDB with key/value pair
 function addLevelDBData(key,value){
   // return new Promise((resolve, reject) => {
-    console.log('Block ' + key + ' with value =' + value + '');
+    // C console.log('Block ' + key + ' with value =' + value + '');
     db.put(key, value, function(err) {
       if(err != null){
         return console.log('Block ' + key + ' submission failed', err);
       }else{
-        return console.log('Block ' + key + ' saved successfully');
+        return console.log('return Block ' + key + ' saved successfully');
       }       
     });
 
@@ -77,15 +102,15 @@ function getLevelDBData(key){
   //   console.log('Value = ' + value);
   // })
     var cnt=0;
-    return new Promise((resolve, reject) => {
+    //return new Promise((resolve, reject) => {
 
       //XXXXXXXXXXXXXXXXXXXX
       db.createReadStream()
       .on('data', function (data) {
-        console.log(data.key, '=', data.value)
-        console.log('key=' + data.key +' value ='+ data.value)
-
+        // C console.log(data.key, '=', data.value)
+        
         cnt++;
+        return console.log('data cnt=' + cnt +' key=' + data.key +' value ='+ data.value)
       })
       .on('error', function (err) {
         console.log('Oh my!', err)
@@ -95,53 +120,19 @@ function getLevelDBData(key){
       })
       .on('end', function () {
         console.log('Stream ended')
-        console.log("LEVELDB cnt =" + cnt);
+        return console.log("end cnt =" + cnt);
       });
       //XXXXXXXXXXXXXXXXXXXX
 
 
 
-        db.get(key, function(err, value) {
-            if (err) return console.log('Not found!', err);
-            resolve(value);
-        });
-    })
+       
+    //})
 
 
 }
 
-// Add data to levelDB with value
-function addDataToLevelDB(newBlock) {
-    let i = 0;    
 
-    return new Promise((resolve, reject) => {     
-
-
-      db.createReadStream()
-        .on('data', function(data) {
-        i++;
-        return console.log('addDataToLevelDB data -Block #' + i);
-      }).on('error', function(err) {
-          console.log('addDataToLevelDB erro -Block #' + i);
-          return console.log('Unable to read data stream!', err)
-      }).on('end', function() {
-        console.log('addDataToLevelDB end -Block #' + i);
-        //console.log('LevelDB Block #' + i);
-        //addLevelDBData(i, newBlock);
-      }).on('close', function() {
-        console.log('addDataToLevelDB close -Block #' + i);
-        // console.log('LevelDB Block #' + i);
-        // addLevelDBData(i, newBlock);
-        resolve(i);
-      });
-
-    }); 
-
-
-
-
-    
-}
 
 
 
@@ -201,17 +192,21 @@ class BlockChain{
    this.chain.push(newBlock);
 
     /******* LEVELDB ********/    
-     // Adding block object to LevelDB
-  addDataToLevelDB(newBlock.height, JSON.stringify(newBlock).toString()).then(function(v){
-    console.log('addDataToLevelDB then ');
-    console.log('LevelDB Block #' + i);
-    addLevelDBData(i, newBlock);
+    return new Promise(function(resolve,regect){
+      // Adding block object to LevelDB
+      // setTimeout(function() {
+        addDataToLevelDB(newBlock.height, JSON.stringify(newBlock).toString());
+        resolve('saved');
+      // }, 300);
+
+    // C console.log('LevelDB Block #' + i);
+    //addLevelDBData(i, newBlock);
     });
 
-    var k = 0;
-    db.get(k,function(err,v){
-      console.log('block '+k+' ............. value ='+ v);
-    });
+    // var k = 0;
+    // db.get(k,function(err,v){
+    //   console.log('block '+k+' ............. value ='+ v);
+    // });
  }
 
 /*################################################
@@ -223,9 +218,23 @@ getBlock(blockHeight){
   //return JSON.parse(JSON.stringify(this.chain[blockHeight]));
   
 /******* LEVELDB ********/
-  getLevelDBData(blockHeight).then(function(v){
-    console.log('levelDB value is ' + v);
-    })
+
+
+return new Promise((resolve, reject) => {
+
+  setTimeout(function() {
+    //getLevelDBData(blockHeight) 
+
+ 
+    db.get(blockHeight, function(err, value) {
+        if (err) return console.log('block not found!', err);
+        resolve(value);
+    });
+  }, 300);
+
+
+  
+})
  
 }
 /*################################################
@@ -241,36 +250,38 @@ getBlock(blockHeight){
     var cnt=0;
     return new Promise((resolve, reject) => {
       
-      //Returns a Readable Stream of keys
-       db.createReadStream()
-      .on('data', function (data) {
-        // console.log(data.key, '=', data.value)
-        // console.log('key=', data)
-        console.log('key=' + data.key +' value ='+ data.value)
 
-        cnt++;
-      })
-      .on('error', function (err) {
-        console.log('Oh my!', err)
-      })
-      .on('close', function () {
-        console.log('Stream closed')
-      })
-      .on('end', function () {
-        console.log('Stream ended')
-        console.log("LEVELDB BlockHeight =" + cnt);
-      }); 
+      setTimeout(function() {
+        //getLevelDBData(blockHeight) 
+    
+        var cnt=0;
 
+        //Returns a Readable Stream of keys
+        db.createReadStream()
+        .on('data', function (data) { 
+          cnt++;
+        })
+        .on('error', function (err) {
+          console.log('Oh my!', err)
+        })
+        .on('close', function () {
+          // C console.log('Stream closed')
+        })
+        .on('end', function () {
+         // C console.log('Stream ended')
+          return console.log("LEVELDB cnt = " + cnt);
+        }); 
+      
 
-      //Returns a Readable Stream of values
-      db.createValueStream()
-      .on('data', function (data) {
-        console.log('value=', data)
-      })
-
+      }, 300);
 
 
     }); 
+      
+
+
+
+   
   }
 
 
@@ -281,23 +292,23 @@ getBlock(blockHeight){
 ################################################*/
 validateBlock(blockHeight){
   // get block object
-  let block = this.getBlock(blockHeight);
+  let bc = new BlockChain();
+  let block = bc.getBlock(blockHeight).then((value) => {  return console.log(value); });
+  console.log('Block for testing ='+ block);
+  
   // get block hash
   let blockHash = block.hash;
+  console.log('blockHash='+ blockHash);
+  
   // remove block hash to test block integrity
   block.hash = '';
   // generate block hash
   let validBlockHash = SHA256(JSON.stringify(block)).toString();
   // Compare
   if (blockHash===validBlockHash) {
-        /******* LEVELDB ********/    
-    //resolve(true);
-
-      return true;
+        return true;
     } else {
-      console.log('Block #'+blockHeight+' invalid hash:\n'+blockHash+'<>'+validBlockHash);
-          /******* LEVELDB ********/    
-      //resolve(false);
+      console.log('Block #'+blockHeight+' invalid hash:\n'+blockHash+'<>'+validBlockHash);      
       return false;
     }
 
@@ -345,11 +356,35 @@ validateChain(){
 
 
 //5: Generate 10 blocks using a for loop
-let bc = new BlockChain();
-for (var i = 0; i <= 3; i++) {
-  bc.addBlock(new Block("test data "+i));
-}
+// let bc = new BlockChain();
+// for (var i = 0; i <= 3; i++) {
+//   bc.addBlock(new Block("test data "+i));
+// }
 
+let bc = new BlockChain();
+i=0;
+(function theLoop (i) {
+  setTimeout(function () {
+      let blockTest = new Block("Test Block - " + (i + 1));
+      bc.addBlock(blockTest).then((result) => {
+          console.log(result);
+          i++;
+          if (i < 5) theLoop(i);
+      });
+  }, 1000);
+})(0);
+
+bc.getBlock(2).then((value) => {  return console.log(value); });
+
+/*
+
+bc.getBlock(2).then((result) => {  console.log(result);});
+
+
+bc.getBlockHeight().then((result) => {  console.log(result); });
+bc.validateBlock(2)
+
+*/
 //6: Validate blockchain
  
 //blockchain.validateChain();
@@ -367,4 +402,21 @@ for (var i = 0; i <= 3; i++) {
  
 
 
+
+/*
+done - Requirement 1	Configure LevelDB to persist dataset
+done - Requirement 2	Modify simpleChain.js functions to persist data with LevelDB
+done - Requirement 3	Modify getBlock() function
+Requirement 4	Modify getBlockHeight() function
+Requirement 5	Modify validate functions
+*/
+
  
+
+
+
+
+
+
+
+
