@@ -300,24 +300,31 @@ validateBlock(blockHeight){
    
   let block = bc.getBlock(blockHeight).then((block) => {  
     var block=JSON.parse(block);
-    console.log(block); 
+    //console.log(block); 
     // get block hash
     let blockHash=block.hash;
 
     console.log('blockHash =>>>>>>'+ blockHash);
-
+    console.log('\n')
     // remove block hash to test block integrity
     block.hash = '';
     // generate block hash
     let validBlockHash = SHA256(JSON.stringify(block)).toString();
+
+    //testing wrong hash...
+    //validBlockHash = '7dcab3849d3eedffd113a804324c85e4d68f35ad84cedfc3eaba2b3a440c5191';
     console.log('validBlockHash =......'+ validBlockHash);
 
     // Compare
     if (blockHash===validBlockHash) {
+        console.log('BlockHash OK');
+        console.log('Block #'+blockHeight+' hash:\n'+blockHash+'====='+validBlockHash);      
+
           return true;
       } else {
         console.log('Block #'+blockHeight+' invalid hash:\n'+blockHash+'<>'+validBlockHash);      
-          return false;
+        console.log('BlockHash Changed!!!');
+        return false;
       }
 
   });
@@ -345,7 +352,7 @@ validateChain(){
   let errorLog = [];
   for (var i = 0; i < this.chain.length-1; i++) {
     // validate block
-    if (!this.validateBlock(i))errorLog.push(i);
+    if (!this.validateBlock(i)) errorLog.push(i);
     // compare blocks hash link
     let blockHash = this.chain[i].hash;
     let previousHash = this.chain[i+1].previousBlockHash;
