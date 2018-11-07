@@ -1,0 +1,16 @@
+/* reveiew*/
+ 
+addBlock(newBlock){
+    return new Promise(function(resolve,regect){
+            // Adding block object to LevelDB        
+            addDataToLevelDB(JSON.stringify(newBlock).toString());
+    )
+    }
+}
+        bc.addBlock('test').then((result) => {
+            console.log(result);
+        })
+
+        bc.getBlock(2).then((data) => {  console.log('hash='+ JSON.parse(data).hash); });
+
+        bc.getBlockHeight().then((result) => {  console.log(result); });

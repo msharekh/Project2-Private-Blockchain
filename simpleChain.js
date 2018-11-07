@@ -82,11 +82,10 @@ function addDataToLevelDB(newBlock) {
   
 }
 
+
 // Add data to levelDB with key/value pair
 function addLevelDBData(key,value){
-  // return new Promise((resolve, reject) => {
-  // C console.log('Block ' + key + ' with value =' + value + '');
-  db.put(key, value, function(err) {
+   db.put(key, value, function(err) {
     if(err != null){
       return console.log('Block ' + key + ' submission failed', err);
     }else{
@@ -99,41 +98,19 @@ function addLevelDBData(key,value){
   // });
 }
 
-// Get data from levelDB with key
+
+ 
+
+ // Get data from levelDB with key
 function getLevelDBData(key){
-  // db.get(key, function(err, value) {
-  //   if (err) return console.log('Not found!', err);
-  //   console.log('Value = ' + value);
-  // })
-  var cnt=0;
-  //return new Promise((resolve, reject) => {
-  
-  //XXXXXXXXXXXXXXXXXXXX
-  db.createReadStream()
-  .on('data', function (data) {
-    // C console.log(data.key, '=', data.value)
-    
-    cnt++;
-    return console.log('data cnt=' + cnt +' key=' + data.key +' value ='+ data.value)
-  })
-  .on('error', function (err) {
-    console.log('Oh my!', err)
-  })
-  .on('close', function () {
-    console.log('Stream closed')
-  })
-  .on('end', function () {
-    console.log('Stream ended')
-    return console.log("end cnt =" + cnt);
+
+  return new Promise((resolve, reject) => {      
+    db.get(key, function(err, value) {
+      if (err) return console.log('block not found!', err);
+      resolve(value);
+    })
+
   });
-  //XXXXXXXXXXXXXXXXXXXX
-  
-  
-  
-  
-  //})
-  
-  
 }
 
 
@@ -224,21 +201,20 @@ class BlockChain{
     /******* LEVELDB ********/
     
     
-    return new Promise((resolve, reject) => {
+    
+      
+      return getLevelDBData(blockHeight).then((data) => {  console.log(data); });
+       
+      
+      // db.get(blockHeight, function(err, value) {
+      //   if (err) return console.log('block not found!', err);
+      //   resolve(value);
+      // });
       
       
-      //getLevelDBData(blockHeight) 
       
       
-      db.get(blockHeight, function(err, value) {
-        if (err) return console.log('block not found!', err);
-        resolve(value);
-      });
-      
-      
-      
-      
-    })
+     
     
   }
   /*################################################
@@ -574,4 +550,12 @@ Requirement 5	Modify validate functions
 
 
 
+/* reveiew
+addBlock(newBlock){
+  return new Promise(function(resolve,regect){
+        // Adding block object to LevelDB
+        
+        addDataToLevelDB(JSON.stringify(newBlock).toString());
 
+
+  */
