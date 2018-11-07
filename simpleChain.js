@@ -62,6 +62,10 @@ function addDataToLevelDB(newBlock) {
       .on('data', function(data) {
       i++;
       // return console.log('addDataToLevelDB data -Block #' + i);
+      var obj = JSON.parse(data.value);
+      //return console.log('data key=' + data.key +' value ='+ data.value +' obj hash ='+ obj.hash)
+      //return console.log('  obj hash ='+ obj.hash)
+
     }).on('error', function(err) {
         console.log('addDataToLevelDB erro -Block #' + i);
         return console.log('Unable to read data stream!', err)
@@ -195,7 +199,7 @@ class BlockChain{
     return new Promise(function(resolve,regect){
       // Adding block object to LevelDB
       // setTimeout(function() {
-        addDataToLevelDB(newBlock.height, JSON.stringify(newBlock).toString());
+        addDataToLevelDB(JSON.stringify(newBlock).toString());
         resolve('saved');
       // }, 300);
 
@@ -220,17 +224,17 @@ getBlock(blockHeight){
 /******* LEVELDB ********/
 
 
-return new Promise((resolve, reject) => {
+  return new Promise((resolve, reject) => {
 
-  setTimeout(function() {
-    //getLevelDBData(blockHeight) 
+    // setTimeout(function() {
+      //getLevelDBData(blockHeight) 
 
- 
-    db.get(blockHeight, function(err, value) {
-        if (err) return console.log('block not found!', err);
-        resolve(value);
-    });
-  }, 300);
+  
+      db.get(blockHeight, function(err, value) {
+          if (err) return console.log('block not found!', err);
+          resolve(value);
+      });
+    // }, 300);
 
 
   
@@ -293,28 +297,46 @@ return new Promise((resolve, reject) => {
 validateBlock(blockHeight){
   // get block object
   let bc = new BlockChain();
-  let block = bc.getBlock(blockHeight).then((value) => {  return console.log(value); });
-  console.log('Block for testing ='+ block);
-  
-  // get block hash
-  let blockHash = block.hash;
-  console.log('blockHash='+ blockHash);
-  
-  // remove block hash to test block integrity
-  block.hash = '';
-  // generate block hash
-  let validBlockHash = SHA256(JSON.stringify(block)).toString();
-  // Compare
-  if (blockHash===validBlockHash) {
-        return true;
-    } else {
-      console.log('Block #'+blockHeight+' invalid hash:\n'+blockHash+'<>'+validBlockHash);      
-      return false;
-    }
-
    
+  let block = bc.getBlock(blockHeight).then((block) => {  
+    var block=JSON.parse(block);
+    console.log(block); 
+    // get block hash
+    let blockHash=block.hash;
+
+    console.log('blockHash =>>>>>>'+ blockHash);
+
+    // remove block hash to test block integrity
+    block.hash = '';
+    // generate block hash
+    let validBlockHash = SHA256(JSON.stringify(block)).toString();
+    console.log('validBlockHash =......'+ validBlockHash);
+
+    // Compare
+    if (blockHash===validBlockHash) {
+          return true;
+      } else {
+        console.log('Block #'+blockHeight+' invalid hash:\n'+blockHash+'<>'+validBlockHash);      
+          return false;
+      }
+
+  });
+  
+   
+ 
+
+  // let blockHash = bc.getBlock(blockHeight).then((data) => {  
+  //   console.log('hash='+ JSON.parse(data).hash); 
+  // });
+  
+  
+   
+  
+  
 
 }
+
+//   bc.validateBlock(2)
 
 /*################################################
 ################ validate Chain  #################
@@ -368,17 +390,33 @@ i=0;
       let blockTest = new Block("Test Block - " + (i + 1));
       bc.addBlock(blockTest).then((result) => {
           console.log(result);
+          // bc.getBlock(i).then((data) => {  
+          //   console.log('hash='+ JSON.parse(data).hash); 
+          // });
           i++;
-          if (i < 5) theLoop(i);
+          if (i < 3) theLoop(i);
       });
   }, 1000);
 })(0);
 
-bc.getBlock(2).then((value) => {  return console.log(value); });
+// bc.getBlock(2).then((data) => {  
+  
+//   var obj = JSON.parse(data);
+
+  
+//   console.log('hash='+ obj.hash); 
+// });
+
+// bc.getBlock(2).then((data) => {  
+  
+//   console.log( JSON.parse(data).hash);   
+// });
+
+
+//bc.getBlock(2).then((result) => {  console.log(result);});
 
 /*
 
-bc.getBlock(2).then((result) => {  console.log(result);});
 
 
 bc.getBlockHeight().then((result) => {  console.log(result); });
