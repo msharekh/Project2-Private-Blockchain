@@ -2,7 +2,8 @@
 |  Learn more: level: https://github.com/Level/level     |
 |  =============================================================*/
 
-const level = require('level');
+// const level = require('level');
+const levelup = require('levelup');
 const chainDB = './chaindata';
 const db = level(chainDB);
 
