@@ -9,9 +9,9 @@
  
  
 
-//const level = require('level');
+const level = require('level');
 const chainDB = './chaindata';
-//const db = level(chainDB);
+const db = level(chainDB);
   
 function c(txt){
   console.log(txt);
@@ -120,10 +120,11 @@ validateChain(){
   bc.addBlock(new Block('4rd block'))
   bc.addBlock(new Block('5rd block'))
   bc.chain
-  // bc.getBlockHeight()
-  // bc.getBlock(0)
-  // bc.validateBlock(2)
-  // bc.validateChain()
+  bc.getBlockHeight()
+  bc.getBlock(0)
+  bc.validateBlock(2)
+  bc.validateChain()
+  c(bc.chain)
   
 
 
