@@ -23,7 +23,7 @@ getBlock(blockHeight){
       return getLevelDBData(blockHeight).then((data) => {  console.log(data); });
 }           
 
-        bc.getBlock(2) 
+        bc.getBlock(2).then((result) => {console.log(result);  });
 ==========================================================================================
 getBlockHeight(){
     return bc.getCreateReadStream().then((data) => {  console.log(data); });   
@@ -32,9 +32,134 @@ getBlockHeight(){
 
         db.createReadStream()...
 }
-    bc.getBlockHeight()
+    bc.getBlockHeight().then((result) => {console.log(result);  });
 
  ==========================================================================================
  readBlockChainDB() {
 
     bc.readBlockChainDB().then((result) => {console.log(result);  });
+
+==========================================================================================
+validateBlock(blockHeight){
+
+    bc.validateBlock(2)
+
+
+    bc.validateChain()
+
+
+
+
+
+
+
+    return new Promise(function(resolve,regect){
+       
+         
+        addDataToLevelDB(JSON.stringify(newBlock).toString());
+        resolve('saved');
+         
+     
+      });
+
+      .then((result) => {console.log(result);  });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// bc.getBlock(2).then((data) => {  
+
+//   var obj = JSON.parse(data);
+
+
+//   console.log('hash='+ obj.hash); 
+// });
+
+// bc.getBlock(2).then((data) => {  
+
+//   console.log( JSON.parse(data).hash);   
+// });
+
+
+//bc.getBlock(2).then((result) => {  console.log(result);});
+
+/*
+
+
+
+bc.getBlockHeight().then((result) => {  console.log(result); });
+bc.validateBlock(2)
+
+*/
+//6: Validate blockchain
+
+//blockchain.validateChain();
+
+//7: Induce errors by changing block data
+
+// let inducedErrorBlocks = [2,4,7];
+// for (var i = 0; i < inducedErrorBlocks.length; i++) {
+//   blockchain.chain[inducedErrorBlocks[i]].data='induced chain error';
+// }
+
+//8: Validate blockchain. The chain should now fail with blocks 2,4, and 7.
+
+//blockchain.validateChain();
+
+
+
+
+/*
+done - Requirement 1	Configure LevelDB to persist dataset
+done - Requirement 2	Modify simpleChain.js functions to persist data with LevelDB
+done - Requirement 3	Modify getBlock() function
+Requirement 4	Modify getBlockHeight() function
+Requirement 5	Modify validate functions
+*/
+
+
+
+
+
+
+
+
+
+/* reveiew
+addBlock(newBlock){
+  return new Promise(function(resolve,regect){
+        // Adding block object to LevelDB
+        
+        addDataToLevelDB(JSON.stringify(newBlock).toString());
+
+
+  */
+
+
+
+  //testing:
+
+// let bc = new BlockChain()
+// bc.addBlock(new Block('2nd block'))
+// bc.addBlock(new Block('3rd block'))
+// bc.addBlock(new Block('4rd block'))
+// bc.addBlock(new Block('5rd block'))
+// bc.chain
+// bc.getBlockHeight()
+// bc.getBlock(0)
+//bc.validateBlock(2)
+//bc.validateChain()

@@ -104,20 +104,16 @@ function addLevelDBData(key,value){
  // Get data from levelDB with key
 function getLevelDBData(key){
 
-  return new Promise((resolve, reject) => {      
-    db.get(key, function(err, value) {
-      if (err) return console.log('block not found!', err);
-      resolve(value);
-    })
+    
 
-  });
+ }
+
+
+
+
+function c(txt){
+console.log(txt);
 }
-
-
-
-
-
-
 
 
 
@@ -175,14 +171,49 @@ class BlockChain{
     
     /******* LEVELDB ********/    
     return new Promise(function(resolve,regect){
-      // Adding block object to LevelDB
+      
+    
+      let blockHeight = 0;  
+  
+        db.createReadStream()
+        .on('data', function(data) {
+          blockHeight++;
+          // return console.log('addDataToLevelDB data -Block #' + i);
+          // var obj = JSON.parse(data.value);
+          //return console.log('data key=' + data.key +' value ='+ data.value +' obj hash ='+ obj.hash)
+          //return console.log('  obj hash ='+ obj.hash)
+          
+        }).on('error', function(err) {
+          console.log('addDataToLevelDB erro -Block #' + i);
+          return console.log('Unable to read data stream!', err)
+        }).on('end', function() {
+          // C console.log('addDataToLevelDB end -Block #' + i);
+          //console.log('LevelDB Block #' + i);
+          //addLevelDBData(i, newBlock);
+        }).on('close', function() {
+
+          let newBlock=JSON.stringify(newBlock).toString();
+      
+          // UTC timestamp
+          newBlock.time = new Date().getTime().toString().slice(0,-3);
+
+          // Block height
+          newBlock.height = blockHeight;
+
+          db.put(blockHeight, newBlock, function(err) {
+            if(err != null){
+              regect('Block ' + key + ' submission failed', err);
+            }else{
+              resolve('return Block ' + key + ' saved successfully');
+            }       
+          });
+
+    //return(i);
+  });
        
-      addDataToLevelDB(JSON.stringify(newBlock).toString());
-      resolve('saved');
        
       
-      // C console.log('LevelDB Block #' + i);
-      //addLevelDBData(i, newBlock);
+  
     });
     
     // var k = 0;
@@ -194,64 +225,57 @@ class BlockChain{
   /*################################################
   ################ Get block  ######################
   ################################################*/
-  getBlock(blockHeight){
-    // return object as a single string
-    /******* BlockChain Array ********/ 
-    //return JSON.parse(JSON.stringify(this.chain[blockHeight]));
-    
-    /******* LEVELDB ********/    
-          
-      return getLevelDBData(blockHeight).then((data) => {  console.log(data); });
-             
-      // db.get(blockHeight, function(err, value) {
-      //   if (err) return console.log('block not found!', err);
-      //   resolve(value);
-      // });
-      
-      
-      
-      
-     
-    
+  getBlock(blockHeight){    
+    return new Promise((resolve, reject) => {  
+       db.get(blockHeight, function(err, value) {
+        if (err) {
+          return console.log('block not found!', err);
+        }else{
+          resolve(value);
+        }
+      })
+    });
   }
+ 
   /*################################################
   ################ Get block height ################
   ################################################*/
   getBlockHeight(){
-    
-    /******* BlockChain Array ********/    
-    //return this.chain.length-1;
-    
-    /******* LEVELDB ********/   
-    let bc = new BlockChain();
-
-    return bc.getCreateReadStream().then((data) => {  console.log(data); });   
-       
+  
+    let i = 0;
+    db.createReadStream().on('data', function(data) {
+          i++;
+        }).on('error', function(err) {
+            return console.log('Unable to read data stream!', err)
+        }).on('close', function() {
+          //BlockHeight
+          resolve(i);
+        });
   }
   
-  getCreateReadStream(){
-    var BlockHeight=0;
-    return new Promise((resolve, reject) => {
+  // getCreateReadStream(){
+  //   var BlockHeight=0;
+  //   return new Promise((resolve, reject) => {
                    
          
-        //Returns a Readable Stream of keys
-        db.createReadStream()
-        .on('data', function (data) { 
-          BlockHeight++;
-        })
-        .on('error', function (err) {
-          console.log('Oh my!', err)
-        })
-        .on('close', function () {
-          // C console.log('Stream closed')
-        })
-        .on('end', function () {
-          // C console.log('Stream ended')
-          resolve(BlockHeight);
-        }); 
+  //       //Returns a Readable Stream of keys
+  //       db.createReadStream()
+  //       .on('data', function (data) { 
+  //         BlockHeight++;
+  //       })
+  //       .on('error', function (err) {
+  //         console.log('Oh my!', err)
+  //       })
+  //       .on('close', function () {
+  //         // C console.log('Stream closed')
+  //       })
+  //       .on('end', function () {
+  //         // C console.log('Stream ended')
+  //         resolve(BlockHeight);
+  //       }); 
                 
-    }); 
-  }
+  //   }); 
+  // }
   
   
   /*################################################
@@ -262,7 +286,7 @@ class BlockChain{
     let bc = new BlockChain();
     
     // get block 
-    let block = bc.getBlock(blockHeight).then((block) => {  
+    let block = bc.getBlock_noThen(blockHeight).then((block) => {  
       var block=JSON.parse(block);
       //console.log(block); 
       // get block hash
@@ -281,7 +305,7 @@ class BlockChain{
       
       // Compare
       if (blockHash===validBlockHash) {
-        //console.log('BlockHash OK');
+        console.log('BlockHash OK');
         //console.log('Block #'+blockHeight+' hash:\n'+blockHash+'====='+validBlockHash);      
         
         return true;
@@ -292,7 +316,7 @@ class BlockChain{
       }
       
     });
-    
+     
     
     
     
@@ -312,53 +336,83 @@ class BlockChain{
   /*################################################
   ################ validate Chain  #################
   ################################################*/
-  
+  // Validate blockchain
   validateChain(){
+
+      // get block chain
+      let bc = new BlockChain();
+
     let errorLog = [];
-    
-    // get block chain
-    let bc = new BlockChain();
-
-    //to get blockchain length
-    bc.getBlockHeight().then((BlockHeight) => {  
+    for (var i = 0; i < bc.getBlockHeight()-1; i++) {
+      // validate block
+      if (!this.validateBlock(i)) errorLog.push(i);
+      // compare blocks hash link
+      bc.getBlock_noThen(bc.getBlockHeight()).then((block) => {  
+        let blockHash =JSON.parse(block).hash;
+        console.log('let blockHash =JSON.parse(block).hash;');
+      });
       
-      let blockchainLength= BlockHeight; 
-      console.log('blockchainLength = ' + blockchainLength);
+      // this.chain[i].hash;
+      // let previousHash = this.chain[i+1].previousBlockHash;
+      // if (blockHash!==previousHash) {
+      //   errorLog.push(i);
+      // }
+    }
+    // if (errorLog.length>0) {
+    //   console.log('Block errors = ' + errorLog.length);
+    //   console.log('Blocks: '+errorLog);
+    // } else {
+    //   console.log('No errors detected');
+    // }
+  }
+
+
+  // validateChain(){
+  //   let errorLog = [];
+    
+  //   // get block chain
+  //   let bc = new BlockChain();
+
+  //   //to get blockchain length
+  //   bc.getBlockHeight().then((BlockHeight) => {  
+      
+  //     let blockchainLength= BlockHeight; 
+  //     console.log('blockchainLength = ' + blockchainLength);
     
 
-      for (var i = 0; i < blockchainLength-1; i++) {
-        //console.log('Block for loop = ' + i);
+  //     for (var i = 0; i < blockchainLength-1; i++) {
+  //       //console.log('Block for loop = ' + i);
   
-        // validate block
-        if (bc.validateBlock(i)) errorLog.push(i);
-        // compare blocks hash link
-        let block = bc.getBlock(i).then((b) => {  
-          var block=JSON.parse(b);
+  //       // validate block
+  //       if (bc.validateBlock(i)) errorLog.push(i);
+  //       // compare blocks hash link
+  //       let block = bc.getBlock(i).then((b) => {  
+  //         var block=JSON.parse(b);
 
-          let blockHash = block.hash;
-          console.log('blockHash = ' + i +':'+ blockHash);
-        });
+  //         let blockHash = block.hash;
+  //         console.log('blockHash = ' + i +':'+ blockHash);
+  //       });
  
 
 
 
-        db.createReadStream()
-        .on('data', function (data) {
-          // C console.log(data.key, '=', data.value)
+  //       db.createReadStream()
+  //       .on('data', function (data) {
+  //         // C console.log(data.key, '=', data.value)
           
-          cnt++;
-          return console.log('data cnt=' + cnt +' key=' + data.key +' value ='+ data.value)
-        })
-        .on('error', function (err) {
-          console.log('Oh my!', err)
-        })
-        .on('close', function () {
-          console.log('Stream closed')
-        })
-        .on('end', function () {
-          console.log('Stream ended')
-          return console.log("end cnt =" + cnt);
-        });
+  //         cnt++;
+  //         return console.log('data cnt=' + cnt +' key=' + data.key +' value ='+ data.value)
+  //       })
+  //       .on('error', function (err) {
+  //         console.log('Oh my!', err)
+  //       })
+  //       .on('close', function () {
+  //         console.log('Stream closed')
+  //       })
+  //       .on('end', function () {
+  //         console.log('Stream ended')
+  //         return console.log("end cnt =" + cnt);
+  //       });
 
 
 
@@ -367,31 +421,31 @@ class BlockChain{
 
 
         
-          // let previousHash =bc.getBlock(i+1).then((block) => { 
-          //   console.log(JSON.parse(block).hash)
+  //         // let previousHash =bc.getBlock(i+1).then((block) => { 
+  //         //   console.log(JSON.parse(block).hash)
           
-          //console.log('previousHash = ' + previousHash);
+  //         //console.log('previousHash = ' + previousHash);
   
-          // if (blockHash!==previousHash) {
-          //   errorLog.push(i);
-          // }
+  //         // if (blockHash!==previousHash) {
+  //         //   errorLog.push(i);
+  //         // }
          
-        }
-        if (errorLog.length>0) {
-          console.log('Block errors = ' + errorLog.length);
-          console.log('Blocks: '+errorLog);
-        } else {
-          console.log('No errors detected');
-        }
+  //       }
+  //       if (errorLog.length>0) {
+  //         console.log('Block errors = ' + errorLog.length);
+  //         console.log('Blocks: '+errorLog);
+  //       } else {
+  //         console.log('No errors detected');
+  //       }
             
 
 
 
-    });
+  //   });
 
 
     
-  }
+  // }
 
   ///   bc.validateChain();
 
@@ -488,55 +542,6 @@ i=0;
   }, 1000);
 })(0);
 
-// bc.getBlock(2).then((data) => {  
-
-//   var obj = JSON.parse(data);
-
-
-//   console.log('hash='+ obj.hash); 
-// });
-
-// bc.getBlock(2).then((data) => {  
-
-//   console.log( JSON.parse(data).hash);   
-// });
-
-
-//bc.getBlock(2).then((result) => {  console.log(result);});
-
-/*
-
-
-
-bc.getBlockHeight().then((result) => {  console.log(result); });
-bc.validateBlock(2)
-
-*/
-//6: Validate blockchain
-
-//blockchain.validateChain();
-
-//7: Induce errors by changing block data
-
-// let inducedErrorBlocks = [2,4,7];
-// for (var i = 0; i < inducedErrorBlocks.length; i++) {
-//   blockchain.chain[inducedErrorBlocks[i]].data='induced chain error';
-// }
-
-//8: Validate blockchain. The chain should now fail with blocks 2,4, and 7.
-
-//blockchain.validateChain();
-
-
-
-
-/*
-done - Requirement 1	Configure LevelDB to persist dataset
-done - Requirement 2	Modify simpleChain.js functions to persist data with LevelDB
-done - Requirement 3	Modify getBlock() function
-Requirement 4	Modify getBlockHeight() function
-Requirement 5	Modify validate functions
-*/
 
 
 
@@ -546,12 +551,6 @@ Requirement 5	Modify validate functions
 
 
 
-/* reveiew
-addBlock(newBlock){
-  return new Promise(function(resolve,regect){
-        // Adding block object to LevelDB
-        
-        addDataToLevelDB(JSON.stringify(newBlock).toString());
 
 
-  */
+
