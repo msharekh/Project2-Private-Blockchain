@@ -203,7 +203,7 @@ class BlockChain{
       }).on('error', function(err) {
         return console.log('Unable to read data stream!', err)
       }).on('close', function() {
-        console.log('p BlockHeight\t' + h);
+        // console.log('p BlockHeight\t' + h);
         resolve(h);
       })
     })
@@ -232,17 +232,17 @@ class BlockChain{
     
     return new Promise(function (resolve,reject){
        
-        let result='';
+        let result
         // get block chain
         let bc = new BlockChain();
         
         // get block object
-        let r =bc.getBlock(blockHeight).then((b) => {  
+        bc.getBlock(blockHeight).then((b) => {  
                     // let block=JSON.parse(block);
                     let block=JSON.parse(b);
                     // get block hash
                     let blockHash = block.hash
-                    c('block hash\t'+blockHash);
+                    // c('block hash\t'+blockHash);
                     
                     // remove block hash to test block integrity
                     block.hash = '';
@@ -252,42 +252,124 @@ class BlockChain{
 
                     // Compare
                     if (blockHash===validBlockHash) {
-                      c('*** Matched ***')
+                      // c('*** Matched ***')
+                      // c('Block #'+blockHeight+'  hash:\n'+blockHash+' === '+validBlockHash);
+
                       result = true;
                     } else {
                       console.log('Block #'+blockHeight+' invalid hash:\n'+blockHash+'<>'+validBlockHash);
                       result = false;
                     }
-                    return result;
+                    resolve(result);
                     
                   });
                   // c(r);
-        resolve(r);
+         
     
   })
     
   }
   
-  // Validate blockchain
+  /*################################################
+  ################ validate Chain  #################
+  ################################################*/
   validateChain(){
-    let errorLog = [];
-    for (var i = 0; i < this.chain.length-1; i++) {
-      // validate block
-      if (!this.validateBlock(i))errorLog.push(i);
-      // compare blocks hash link
-      let blockHash = this.chain[i].hash;
-      let previousHash = this.chain[i+1].previousBlockHash;
-      if (blockHash!==previousHash) {
-        errorLog.push(i);
-      }
-    }
-    if (errorLog.length>0) {
-      console.log('Block errors = ' + errorLog.length);
-      console.log('Blocks: '+errorLog);
-    } else {
-      console.log('No errors detected');
-    }
+
+    // return new Promise(function(resolve,reject){
+
+
+
+                  let errorLog = [];
+                let bc = new BlockChain();
+
+                //get blockHieght
+                bc.getBlockHeight().then((h) => {
+
+                  let result
+
+
+                  (function theLoop (i) {
+                    setTimeout(function () {
+
+                          //validate blocks 
+                          c(i)        
+                          // let i=0
+                          var promise_validateBlock = bc.validateBlock(i).then((result) => {
+                            let isValidateBlock = result;
+                            c(i+' isValidateBlock\t'+result)
+
+                            return(result)
+                          })
+
+                          var promise_getBlock = bc.getBlock(i).then((b) => {
+                            let block=JSON.parse(b);
+                            let blockHash = block.hash;
+                            // c('blockHash\t'+blockHash)
+
+                            return(blockHash)
+                          }).catch(function(error) {
+                            console.log('error'+error);
+                          });
+
+                          var promise_getNextBlock = bc.getBlock(i+1).then((b) => {
+                            let nextblock=JSON.parse(b);
+                                                                          
+                             let previousHash = nextblock.previousBlockHash;
+                            // c('previousHash\t'+previousHash)
+
+                            return(previousHash)
+                          }).catch(function(error) {
+                            console.log('error'+error);
+                          });
+                           
+          
+                           
+                          Promise.all([promise_validateBlock, promise_getBlock,promise_getNextBlock]).then((values) => {
+                                    console.log('\nPromise.all\n');
+
+                                    let isValidateBlock=values[0];
+                                    c('isValidateBlock\t'+isValidateBlock);
+                                    let blockHash=values[1];
+                                    c('blockHash\t'+blockHash);
+                                    let previousHash=values[2];
+                                    c('previousHash\t'+previousHash);
+                            c('ticking..\t'+i);
+
+                            if (blockHash!==previousHash) {
+                              errorLog.push(i);
+                            }
+                            
+                            i++;
+                            if (i < h -1){
+                              theLoop(i);
+                            }
+                            else{
+                              console.log('no more blocks to check');
+
+                              if (errorLog.length>0) {
+                                console.log('Block errors = ' + errorLog.length);
+                                console.log('Blocks: '+errorLog);
+                              } else {
+                                console.log('No errors detected');
+                              }
+                            }
+                          }).catch(function(error) {
+                            console.log('all errors'+error);
+                          });
+
+                    }, 2000);
+                  })(0);
+
+                  
+
+                })
+
+    // })
+    
+
+    
   }
+ 
   
   
   showBlockChain(){
@@ -421,9 +503,13 @@ function runTest2(){
 //               //c(JSON.parse((result.value)).hash);
 // })
 
-bc.validateBlock(1).then((result) => {
-                c(result)
-})
+// bc.validateBlock(1).then((result) => {
+//                 c(result)
+// })
+bc.validateChain()
+// bc.validateChain().then((result) => {
+//   c(result)
+// })
 // c("validateChain \t array \t" + bc.validateChain())
 
 
@@ -458,6 +544,7 @@ bc.validateBlock(1).then((result) => {
 
 
 //testPromise();
+// testPromiseAll();
 //updateChain();
 // bc.chain
 
@@ -483,6 +570,23 @@ bc.validateBlock(1).then((result) => {
 //   });
 // }
 
+function setDelay(i) {
+  setTimeout(function(){
+    console.log('ticking..\t'+i);
+  }, 1000);
+}
+
+function testPromiseAll(){
+    var promise1 = Promise.resolve(3);
+    var promise2 = 42;
+    var promise3 = new Promise(function(resolve, reject) {
+      setTimeout(resolve, 100, 'foo');
+    });
+
+    Promise.all([promise1, promise2, promise3]).then(function(values) {
+      console.log(values);
+    });
+}
 function testPromise(){
   return new Promise(function(resolve, reject) {
     
