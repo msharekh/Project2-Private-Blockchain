@@ -89,14 +89,20 @@ class BlockChain{
   
   
   
-  // Add new block
+  /*################################################
+  ################ Add block  ######################
+  ################################################*/
   addBlock(newBlock){    
     return new Promise(function(resolve,reject){
       
-      let h = 0;        
+      // let h = 0;        
       
-      bc.getBlockHeight().then((h) => {         
-        c('fn addBlock')
+      bc.getBlockHeight().then((h) => {   
+        
+        if(h>1){
+          c('catch h '+ h)
+        }
+        c('fn addBlock' + h)
         
         /// Block height         
         newBlock.height = h;
@@ -108,7 +114,11 @@ class BlockChain{
       }).then((objBlock) => { 
         
         //*************** formating block *****************
-        
+        /*    objBlock:-
+        -   objBlock[0]...........newBlock
+        -   objBlock[1]...........h
+        -   objBlock[2]...........previousBlock
+        */
         // UTC timestamp
         c('objBlock\t'+objBlock)
         let newBlock=objBlock[0];
@@ -133,14 +143,22 @@ class BlockChain{
           addLevelDBData(h,newBlock)
         }
         else{
-          c('block heith >0 !!!!!!!!!!!!   ='+h);
+          c('block height >0 !!!!!!!!!!!!   = '+h);
+          
+          // Block height
+          newBlock.height = h;
+          
           
           // previous block hash
           bc.getBlock(h-1).then((previousBlock) => { 
+            
             c('previousBlock,,,,,\t'+previousBlock) 
             
             newBlock.previousBlockHash = JSON.parse((previousBlock)).hash; 
             c('previousBlock.hash\t'+JSON.parse((previousBlock)).hash);
+            
+            //check existance of newBlock
+            c(newBlock)
             
             // Block hash with SHA256 using newBlock and converting to a string
             newBlock.hash = SHA256(JSON.stringify(newBlock)).toString();
@@ -173,7 +191,9 @@ class BlockChain{
   
   
   
-  // Get block height
+  /*################################################
+  ################ Get block height ################
+  ################################################*/
   getBlockHeight(){
     return new Promise(function(resolve,reject){
       
@@ -189,7 +209,9 @@ class BlockChain{
     })
   }
   
-  // get block
+  /*################################################
+  ################ Get block  ######################
+  ################################################*/
   getBlock(blockHeight){
     // return object as a single string
     
@@ -203,23 +225,47 @@ class BlockChain{
     
   }
   
-  // validate block
+  /*################################################
+  ################ validate block  #################
+  ################################################*/
   validateBlock(blockHeight){
-    // get block object
-    let block = this.getBlock(blockHeight);
-    // get block hash
-    let blockHash = block.hash;
-    // remove block hash to test block integrity
-    block.hash = '';
-    // generate block hash
-    let validBlockHash = SHA256(JSON.stringify(block)).toString();
-    // Compare
-    if (blockHash===validBlockHash) {
-      return true;
-    } else {
-      console.log('Block #'+blockHeight+' invalid hash:\n'+blockHash+'<>'+validBlockHash);
-      return false;
-    }
+    
+    return new Promise(function (resolve,reject){
+       
+        let result='';
+        // get block chain
+        let bc = new BlockChain();
+        
+        // get block object
+        let r =bc.getBlock(blockHeight).then((b) => {  
+                    // let block=JSON.parse(block);
+                    let block=JSON.parse(b);
+                    // get block hash
+                    let blockHash = block.hash
+                    c('block hash\t'+blockHash);
+                    
+                    // remove block hash to test block integrity
+                    block.hash = '';
+
+                    // generate block hash
+                    let validBlockHash = SHA256(JSON.stringify(block)).toString();
+
+                    // Compare
+                    if (blockHash===validBlockHash) {
+                      c('*** Matched ***')
+                      result = true;
+                    } else {
+                      console.log('Block #'+blockHeight+' invalid hash:\n'+blockHash+'<>'+validBlockHash);
+                      result = false;
+                    }
+                    return result;
+                    
+                  });
+                  // c(r);
+        resolve(r);
+    
+  })
+    
   }
   
   // Validate blockchain
@@ -248,7 +294,7 @@ class BlockChain{
     return new Promise(function(resolve,reject){
       let i = 0;
       // for ( n=0 ; n<h ; n++ ){
-        
+      
       // }
       let blocks=[];
       db.createReadStream().on('data', function(data) {
@@ -266,8 +312,8 @@ class BlockChain{
         return console.log('Unable to read data stream!', err)
       }).on('close', function() {
         // console.log('closing Block #' + data);
-        c('blocks..... '+blocks+'\n')
-
+        // c('blocks..... '+blocks+'\n')
+        
         resolve(blocks)
       });
     });
@@ -327,54 +373,73 @@ function runTest2(){
     c("Block DB \t#" + i +"\tGenesis") ;
   });
   
-  i=0;
   (function theLoop (i) {
     setTimeout(function () {
       let blockTest = new Block("Test Block - " + (i + 1));
       bc.addBlock(blockTest).then((result) => {
+        console.log(result);
         i++;
-        if (i < 3) theLoop(i);
-        else {
-          //testing 
-          
-          //c(bc.chain)
-          //c("getBlockHeight \t array \t" + bc.getBlockHeight())
-          // c(bc.getBlock(0))
-          // bc.getBlock(0).then((result) => {
-          //   c("Block DB \t#" + result) ;
-          // });
-          //c("validateBlock \t array \t" + bc.validateBlock(2))
-          //c("validateChain \t array \t" + bc.validateChain())
-          //c("getDBblockHeight \t" + bc.getDBblockHeight())                  
-          
-        }
+        if (i < 10) theLoop(i);
       });
-    }, 1000);            
-    
+    }, 1000);
   })(0);
+  
+  // i=0;
+  // (function theLoop (i) {
+  //   setTimeout(function () {
+  //     let blockTest = new Block("Test Block - " + (i + 1));
+  //     bc.addBlock(blockTest).then((result) => {
+  //       i++;
+  //       if (i < 10) theLoop(i);
+  //       else {
+  //         //testing 
+  
+  //         //c(bc.chain)
+  //         //c("getBlockHeight \t array \t" + bc.getBlockHeight())
+  //         // c(bc.getBlock(0))
+  //         // bc.getBlock(0).then((result) => {
+  //         //   c("Block DB \t#" + result) ;
+  //         // });
+  //         //c("getDBblockHeight \t" + bc.getDBblockHeight())                  
+  
+  //       }
+  //     });
+  //   }, 1000);            
+  
+  // })(0);
   
 }
 
 //addTestBlock();
+
 //runTest2();
 
-bc.showBlockChain().then((result) => {
-  // c(JSON.stringify(result.value));
-  c(result);
-  // c(result.value);
-  //c(JSON.parse((result.value)).hash);
+// bc.showBlockChain().then((result) => {
+//               // c(JSON.stringify(result.value));
+//   c(result);
+//               // c(result.value);
+//               //c(JSON.parse((result.value)).hash);
+// })
+
+bc.validateBlock(1).then((result) => {
+                c(result)
 })
+// c("validateChain \t array \t" + bc.validateChain())
+
 
 // c(bc.getBlock(0).then((b) => {
-//   // c("Block DB \t#" + block) ;
-//   //  var hash =jQuery.parseJSON(JSON.stringify(block));
-//   let block={};
-//   block=b;
-//   block.previousHash='ffffffff';
-//   //  var hash =JSON.stringify(block);
-//   //  JSON.parse(block).hash ;
-//   // c("hash\t"+hash);  
-//   c("block.previousHash\t"+block.hash);  
+//               // c("Block DB \t#" + block) ;
+//               //  var hash =jQuery.parseJSON(JSON.stringify(block));
+//               // let block={};
+//             // block=b;
+//             // block.previousHash='ffffffff';
+//             //  var hash =JSON.stringify(block);
+//             //  JSON.parse(block).hash ;
+//             // c("hash\t"+hash);  
+//             // c("block.previousHash\t"+block.hash);  
+//             //c(b)
+//             // c(JSON.parse(b))
+//             c(JSON.parse(b).hash)
 // }));
 
 // c(bc.getBlockHeight().then((block) => {   
