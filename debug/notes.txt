@@ -1,0 +1,32 @@
+addBlock(newBlock)
+
+MEETS SPECIFICATIONS
+
+
+1.  SimpleChain.js includes the Node.js level library and configured to persist data within the project directory.
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+        const SHA256 = require('crypto-js/sha256');
+        const level = require('level');
+        const chainDB = './chaindata';
+        const db = level(chainDB);
+
+
+===========================================================================
+2.  addBlock(newBlock) includes a method to store newBlock within LevelDB
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+  bc.addBlock(GenesisBlock).then((result) => {
+    c("Block DB \t#" + i +"\tGenesis") ;
+  });
+
+
+===========================================================================
+ .  
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+   
+
+
+===========================================================================
+
+
+validateBlock() function to validate a block stored within levelDB
+

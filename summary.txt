@@ -1,0 +1,98 @@
+solutions in simpleChain.js
+
+MEETS SPECIFICATIONS
+
+
+1.  SimpleChain.js includes the Node.js level library and configured to persist data within the project directory.
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+    /**** Done ****/
+
+    const SHA256 = require('crypto-js/sha256');
+    const level = require('level');
+    const chainDB = './chaindata';
+    const db = level(chainDB);
+
+
+===========================================================================
+2.  addBlock(newBlock) includes a method to store newBlock within LevelDB
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+    /**** Done ****/
+
+    bc.addBlock(new Block("First block in chain")).then((result) => {
+        c("Block DB \t Genesis") ;
+    });
+
+    db.put(key, value, function(err) {
+        if (err) return console.log('Block ' + key + ' submission failed', err);        
+    })
+
+===========================================================================
+3.  Genesis block persist as the first block in the blockchain using 
+    LevelDB.
+    Additionally, when adding a new block to the chain, 
+    code checks if a Genesis block already exists. 
+    If not, one is created before adding the a block.
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+    /**** Done ****/
+
+    result:
+    { key: '0',
+    value: '{"hash":"6492b31cc4fa818534d34bb1f4f93163b8695440312f20831c2f192c7335c3c6","height":0,"body":"Test Block - 1 ***** GENESIS Block *****","time":"1541801684","previousBlockHash":""}' },
+    { key: '1',
+    value: '{"hash":"a28ef6cefd8c8a53b7d8fe01cad2de6f11f579be70129628bc2176e7513cea77","height":1,"body":"Test Block - 2","time":"1541801685","previousBlockHash":"6492b31cc4fa818534d34bb1f4f93163b8695440312f20831c2f192c7335c3c6"}' },
+
+===========================================================================
+4.  validateBlock() function to validate a block stored within levelDB  
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   
+    /**** Done ****/
+
+    bc.validateBlock(0).then((result) => {
+        c(result)
+    })
+
+    result:
+    true
+
+
+===========================================================================
+5.  validateChain() function to validate blockchain stored within levelDB    
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+    /**** Done ****/
+   
+    bc.validateChain()
+
+    result:
+    No errors detected
+
+
+===========================================================================
+6.  getBlock() function retrieves a block by block height 
+    within the LevelDB chain.   
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+    /**** Done ****/
+   
+    result:
+    { 
+    hash: '7497ef57108c9369aa795e5a3f80f0b6501611afd39f4bcdb58a1bb8f829046b',
+    height: 2,
+    body: 'Test Block - 3',
+    time: '1541801686',
+    previousBlockHash: 'a28ef6cefd8c8a53b7d8fe01cad2de6f11f579be70129628bc2176e7513cea77'
+    }
+
+
+===========================================================================
+7.  getBlockHeight() function retrieves current block height 
+    within the LevelDB chain.  
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+    /**** Done ****/
+
+    result:
+    getBlockHeight  10
+
+
+===========================================================================
+
+
+validateBlock() function to validate a block stored within levelDB
+
