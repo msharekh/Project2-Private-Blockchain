@@ -34,6 +34,21 @@ MEETS SPECIFICATIONS
     If not, one is created before adding the a block.
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
     /**** Done ****/
+    
+   let bc = new BlockChain(); 
+   
+  (function theLoop (i) {
+    setTimeout(function () {
+      let blockTest = new Block("Test Block - " + (i + 1));
+      bc.addBlock(blockTest).then((result) => {
+        console.log(result);
+        i++;
+        if (i < 10) theLoop(i);
+      });
+    }, 1000);
+  })(0);
+  
+  
 
     result:
     { key: '0',
