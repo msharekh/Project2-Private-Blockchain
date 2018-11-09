@@ -24,7 +24,7 @@ function c(txt){
 function addLevelDBData(key,value){
   db.put(key, value, function(err) {
     if (err) return console.log('Block ' + key + ' submission failed', err);
-    getLevelDBData(key);
+    // getLevelDBData(key);
     
   })
   
@@ -125,6 +125,9 @@ class BlockChain{
           newBlock.hash = SHA256(JSON.stringify(newBlock)).toString();
           c('newBlock.hash\t'+newBlock.hash);
           
+          //finally VERY IMPORTANT - stringify block
+          newBlock=JSON.stringify(newBlock).toString();
+          
           // Adding block object to chain
           //*************** adding block to DB *****************
           addLevelDBData(h,newBlock)
@@ -135,14 +138,16 @@ class BlockChain{
           // previous block hash
           bc.getBlock(h-1).then((previousBlock) => { 
             c('previousBlock,,,,,\t'+previousBlock) 
-            // c('hash='+ JSON.parse(previousBlock).hash); 
             
-            // newBlock.previousBlockHash = previousBlock.hash; 
-            // c('previousBlock.hash\t'+previousBlock.hash);
+            newBlock.previousBlockHash = JSON.parse((previousBlock)).hash; 
+            c('previousBlock.hash\t'+JSON.parse((previousBlock)).hash);
             
             // Block hash with SHA256 using newBlock and converting to a string
             newBlock.hash = SHA256(JSON.stringify(newBlock)).toString();
             c('newBlock.hash\t'+newBlock.hash);
+            
+            //finally VERY IMPORTANT - stringify block
+            newBlock=JSON.stringify(newBlock).toString();
             
             // Adding block object to chain
             //*************** adding block to DB *****************
@@ -191,10 +196,8 @@ class BlockChain{
     return new Promise(function (resolve,reject){
       
       db.get(blockHeight, function(err, block) {
-        if (err) return console.log('Not found!', err);   
-        let b={};
-        b.hash='kfksdfksa';  
-        resolve(b);
+        if (err) return console.log('Not found!', err);          
+        resolve(block);
       })   
     });
     
@@ -239,11 +242,15 @@ class BlockChain{
       console.log('No errors detected');
     }
   }
-
-
+  
+  
   showBlockChain(){
     return new Promise(function(resolve,reject){
       let i = 0;
+      // for ( n=0 ; n<h ; n++ ){
+        
+      // }
+      let blocks=[];
       db.createReadStream().on('data', function(data) {
         // c(JSON.parse(data.value))
         // let objBlock = {};
@@ -252,13 +259,16 @@ class BlockChain{
         // let objBlock=JSON.parse(JSON.stringify(data));
         // c(objBlock);
         i++;
-        resolve(data)
+        blocks.push(data)
         // c('block#'+data.key+"\tvalue:\t"+data.value);
         // c('  obj hash ='+ obj.hash)
       }).on('error', function(err) {
         return console.log('Unable to read data stream!', err)
       }).on('close', function() {
         // console.log('closing Block #' + data);
+        c('blocks..... '+blocks+'\n')
+
+        resolve(blocks)
       });
     });
   }
@@ -278,33 +288,35 @@ function addTestBlock(){
   // let bc = new BlockChain(); 
   
   let i = 0;   
-    let newBlock = new Block('---test block----')
-    c(newBlock);
-    // Block height
-    newBlock.height = i;
-    // UTC timestamp
-    newBlock.time = new Date().getTime().toString().slice(0,-3);
-    // previous block hash
-    // if(this.chain.length>0){
-    //   newBlock.previousBlockHash = this.chain[this.chain.length-1].hash;
-    // }
-    // Block hash with SHA256 using newBlock and converting to a string
-    newBlock.hash = SHA256(JSON.stringify(newBlock)).toString();
-    // Adding block object to chain
-
-    c(newBlock);
-    // this.chain.push(newBlock);
-    newBlock=JSON.stringify(newBlock).toString();
-
-    c(newBlock);
-
-    db.put(i, newBlock, function(err) {
-      
-      if (err) return console.log('Block ' + key + ' submission failed', err);
-      
-    })        
-    // });
+  let newBlock = new Block('---test block----')
+  c(newBlock);
+  // Block height
+  newBlock.height = i;
+  // UTC timestamp
+  newBlock.time = new Date().getTime().toString().slice(0,-3);
+  // previous block hash
+  // if(this.chain.length>0){
+  //   newBlock.previousBlockHash = this.chain[this.chain.length-1].hash;
+  // }
+  // Block hash with SHA256 using newBlock and converting to a string
+  newBlock.hash = SHA256(JSON.stringify(newBlock)).toString();
+  // Adding block object to chain
+  
+  c(newBlock);
+  // this.chain.push(newBlock);
+  newBlock=JSON.stringify(newBlock).toString();
+  
+  c(newBlock);
+  
+  db.put(i, newBlock, function(err) {
+    
+    if (err) return console.log('Block ' + key + ' submission failed', err);
+    
+  })        
+  // });
 }
+
+
 function runTest2(){
   
   let bc = new BlockChain();
@@ -348,8 +360,9 @@ function runTest2(){
 
 bc.showBlockChain().then((result) => {
   // c(JSON.stringify(result.value));
+  c(result);
   // c(result.value);
-  c(JSON.parse((result.value)).hash);
+  //c(JSON.parse((result.value)).hash);
 })
 
 // c(bc.getBlock(0).then((b) => {
@@ -365,14 +378,17 @@ bc.showBlockChain().then((result) => {
 // }));
 
 // c(bc.getBlockHeight().then((block) => {   
-//   // c("getBlockHeight\t"+block);  
+//   c("getBlockHeight\t"+block);  
 // }));
+
 // c(bc.chain)
 // c(bc.updateChain());
 // c(bc.chain)
 
-// c(bc.getBlock(0).then(function(block) {
-//     c(block) ;
+// c(bc.getBlock(0).then(function(value) {
+//     //c(block) ;
+//     // c(value.hash) ;
+//     c(JSON.parse((value)).hash)
 // }));
 
 
