@@ -2,15 +2,16 @@
 |  Learn more: level: https://github.com/Level/level     |
 |  =============================================================*/
 
-// const level = require('level');
-const levelup = require('levelup');
-const chainDB = './chaindata';
+const level = require('level');
+const chainDB = './levelSandboxDB';
 const db = level(chainDB);
 
 // Add data to levelDB with key/value pair
 function addLevelDBData(key,value){
   db.put(key, value, function(err) {
     if (err) return console.log('Block ' + key + ' submission failed', err);
+    getLevelDBData(key);
+
   })
 }
 

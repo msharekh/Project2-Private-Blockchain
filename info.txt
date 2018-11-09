@@ -68,7 +68,11 @@ validateBlock(blockHeight){
 
 
 
-
+      setTimeout(function(){ 
+     
+        c("Hello"); 
+    
+    }, 3000);
 
 
 
@@ -148,6 +152,7 @@ addBlock(newBlock){
 
 
   */
+
 
 
 

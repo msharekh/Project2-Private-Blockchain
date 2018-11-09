@@ -179,7 +179,7 @@ class BlockChain{
         .on('data', function(data) {
           blockHeight++;
           // return console.log('addDataToLevelDB data -Block #' + i);
-          // var obj = JSON.parse(data.value);
+          var obj = JSON.parse(data.value);
           //return console.log('data key=' + data.key +' value ='+ data.value +' obj hash ='+ obj.hash)
           //return console.log('  obj hash ='+ obj.hash)
           
@@ -193,7 +193,7 @@ class BlockChain{
         }).on('close', function() {
 
           let newBlock=JSON.stringify(newBlock).toString();
-      
+          
           // UTC timestamp
           newBlock.time = new Date().getTime().toString().slice(0,-3);
 
