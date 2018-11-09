@@ -68,7 +68,7 @@ class Block{
     this.height = 0,
     this.body = data,
     this.time = 0,
-    this.previousblockhash = ""
+    this.previousBlockHash = ""
   }
 }
 
@@ -92,94 +92,133 @@ class BlockChain{
   /*################################################
   ################ Add block  ######################
   ################################################*/
-  addBlock(newBlock){    
-    return new Promise(function(resolve,reject){
-      
-      // let h = 0;        
-      
-      bc.getBlockHeight().then((h) => {   
+  addBlock(newBlock){  
+    // return new Promise(function(resolve,reject){
+    //     // Add new block
         
-        if(h>1){
-          c('catch h '+ h)
-        }
-        c('fn addBlock' + h)
+    //     // UTC timestamp
+    //     newBlock.time = new Date().getTime().toString().slice(0,-3);
+    //     // previous block hash
         
-        /// Block height         
-        newBlock.height = h;
-        let objBlock=[];
-        objBlock.push(newBlock)
-        objBlock.push(h)
+    //     // Block hash with SHA256 using newBlock and converting to a string
+    //     newBlock.hash = SHA256(JSON.stringify(newBlock)).toString();
         
-        return objBlock;          
-      }).then((objBlock) => { 
         
-        //*************** formating block *****************
-        /*    objBlock:-
-        -   objBlock[0]...........newBlock
-        -   objBlock[1]...........h
-        -   objBlock[2]...........previousBlock
-        */
-        // UTC timestamp
-        c('objBlock\t'+objBlock)
-        let newBlock=objBlock[0];
-        newBlock.time = new Date().getTime().toString().slice(0,-3);
-        c('newBlock.time\t'+newBlock.time)
-        
-        let h=objBlock[1]
-        
-        // let bc=new BlockChain();
-        
-        if(h==0)
-        {
-          // Block hash with SHA256 using newBlock and converting to a string
-          newBlock.hash = SHA256(JSON.stringify(newBlock)).toString();
-          c('newBlock.hash\t'+newBlock.hash);
-          
-          //finally VERY IMPORTANT - stringify block
-          newBlock=JSON.stringify(newBlock).toString();
-          
-          // Adding block object to chain
-          //*************** adding block to DB *****************
-          addLevelDBData(h,newBlock)
-        }
-        else{
-          c('block height >0 !!!!!!!!!!!!   = '+h);
-          
-          // Block height
-          newBlock.height = h;
-          
-          
-          // previous block hash
-          bc.getBlock(h-1).then((previousBlock) => { 
-            
-            c('previousBlock,,,,,\t'+previousBlock) 
-            
-            newBlock.previousBlockHash = JSON.parse((previousBlock)).hash; 
-            c('previousBlock.hash\t'+JSON.parse((previousBlock)).hash);
-            
-            //check existance of newBlock
-            c(newBlock)
-            
-            // Block hash with SHA256 using newBlock and converting to a string
-            newBlock.hash = SHA256(JSON.stringify(newBlock)).toString();
-            c('newBlock.hash\t'+newBlock.hash);
-            
-            //finally VERY IMPORTANT - stringify block
-            newBlock=JSON.stringify(newBlock).toString();
-            
-            // Adding block object to chain
-            //*************** adding block to DB *****************
-            addLevelDBData(h,newBlock)
-          })
-        }
-        
-        // return newBlock; 
-        
-      })
-      
-      
-      
-    });
+    //     // Adding block object to chain
+    //     //-----------addDataToLevelDB
+    //       let i = 0;
+    //       db.createReadStream().on('data', function(data) {
+    //         i++;
+    //       }).on('error', function(err) {
+    //         return console.log('Unable to read data stream!', err)
+    //       }).on('close', function() {
+    //         console.log('Block #' + i);
+
+    //           // Block height
+    //         newBlock.height =i;
+
+    //         //-----------addLevelDBData(key,value){
+    //           db.put(i, newBlock, function(err) {
+    //             if (err) return console.log('Block ' + key + ' submission failed', err);
+    //             // getLevelDBData(key);
+                
+    //           })
+    //       });
+    // })
+                                                return new Promise(function(resolve,reject){
+                                                  
+                                                  
+                                                  // let h = 0;        
+                                                  
+                                                  bc.getBlockHeight().then((h) => {   
+                                                    
+                                                    if(h>0){
+                                                      c('\n=============================') 
+                                                      c('\ncatch h '+ h)
+                                                    }
+
+                                                    c('fn addBlock ' + h)
+                                                    
+                                                    /// Block height         
+                                                    newBlock.height = h;
+                                                    let objBlock=[];
+                                                    objBlock.push(newBlock)
+                                                    objBlock.push(h)
+                                                    
+                                                    return objBlock;          
+                                                  }).then((objBlock) => { 
+                                                    
+                                                    //*************** formating block *****************
+                                                    /*    objBlock:-
+                                                    -   objBlock[0]...........newBlock
+                                                    -   objBlock[1]...........h
+                                                    -   objBlock[2]...........previousBlock
+                                                    */
+                                                    // UTC timestamp
+                                                    c('objBlock\t'+objBlock)
+                                                    let newBlock=objBlock[0];
+                                                    newBlock.time = new Date().getTime().toString().slice(0,-3);
+                                                    c('newBlock.time\t'+newBlock.time)
+                                                    
+                                                    let h=objBlock[1]
+                                                    
+                                                    // let bc=new BlockChain();
+                                                    
+                                                    if(h>0)
+                                                    {
+                                                      
+                                                      c('\nblock height >0 !!!!!!!!!!!!   = '+h);
+                                                      
+                                                      // Block height
+                                                      newBlock.height = h;
+                                                      
+                                                      
+                                                      // previous block hash
+                                                      bc.getBlock(h-1).then((previousBlock) => { 
+                                                        
+                                                        c('previousBlock,,,,,\t'+previousBlock) 
+                                                        
+                                                        newBlock.previousBlockHash = JSON.parse((previousBlock)).hash; 
+                                                        c('previousBlock.hash\t'+JSON.parse((previousBlock)).hash);
+                                                        
+                                                        //check existance of newBlock
+                                                        c(newBlock)
+                                                        
+                                                        // Block hash with SHA256 using newBlock and converting to a string
+                                                        newBlock.hash = SHA256(JSON.stringify(newBlock)).toString();
+                                                        c('newBlock.hash\t'+newBlock.hash);
+                                                        
+                                                        //finally VERY IMPORTANT - stringify block
+                                                        newBlock=JSON.stringify(newBlock).toString();
+                                                        
+                                                        // Adding block object to chain
+                                                        //*************** adding block to DB *****************
+                                                        addLevelDBData(h,newBlock)
+                                                      }) 
+                                                    }
+                                                    else{
+
+                                                                // Block hash with SHA256 using newBlock and converting to a string
+                                                                newBlock.hash = SHA256(JSON.stringify(newBlock)).toString();
+                                                                c('GENESIS newBlock.hash\t'+newBlock.hash);
+                                                                
+                                                                //finally VERY IMPORTANT - stringify block
+                                                                newBlock=JSON.stringify(newBlock).toString();
+                                                                c(newBlock)
+                                                                // Adding block object to chain
+                                                                //*************** adding block to DB *****************
+                                                                addLevelDBData(0,newBlock)
+                                                                
+                                                    }
+                                                    resolve('saved')
+                                                    
+                                                    // return newBlock; 
+                                                    
+                                                  })
+                                                  
+                                                  
+                                                  
+                                                });
     
     
     
@@ -450,10 +489,10 @@ function runTest2(){
   let bc = new BlockChain();
   
   //GenesisBlock
-  let GenesisBlock  = new Block("First block in chain -Genesis Block - " + 0);
-  bc.addBlock(GenesisBlock).then((result) => {
-    c("Block DB \t#" + i +"\tGenesis") ;
-  });
+  // let GenesisBlock  = new Block("First block in chain -Genesis Block - " + 0);
+  // bc.addBlock(GenesisBlock).then((result) => {
+  //   c("Block DB \t#" + i +"\tGenesis") ;
+  // });
   
   (function theLoop (i) {
     setTimeout(function () {
@@ -492,21 +531,40 @@ function runTest2(){
   
 }
 
-//addTestBlock();
 
 //runTest2();
+// addTestBlock();
+
+
+bc.validateChain()
+
 
 // bc.showBlockChain().then((result) => {
-//               // c(JSON.stringify(result.value));
 //   c(result);
-//               // c(result.value);
-//               //c(JSON.parse((result.value)).hash);
 // })
+
+// bc.validateBlock(1).then((result) => {
+//    c(result)
+// })
+
+// c(bc.getBlock(0).then((b) => {
+//             c(JSON.parse(b).hash)
+// }));
+
+
+
+
+//===========================
+//===========================
+//===========================
+//===========================
 
 // bc.validateBlock(1).then((result) => {
 //                 c(result)
 // })
-bc.validateChain()
+
+ 
+
 // bc.validateChain().then((result) => {
 //   c(result)
 // })
