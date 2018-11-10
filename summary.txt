@@ -18,7 +18,7 @@ MEETS SPECIFICATIONS
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
     /**** Done ****/
 
-    bc.addBlock(new Block("First block in chain")).then((result) => {
+    myBlockChain.addBlock(new Block("First block in chain")).then((result) => {
         c("Block DB \t Genesis") ;
     });
 
@@ -40,7 +40,7 @@ MEETS SPECIFICATIONS
   (function theLoop (i) {
     setTimeout(function () {
       let blockTest = new Block("Test Block - " + (i + 1));
-      bc.addBlock(blockTest).then((result) => {
+      myBlockChain.addBlock(blockTest).then((result) => {
         console.log(result);
         i++;
         if (i < 10) theLoop(i);
@@ -61,7 +61,7 @@ MEETS SPECIFICATIONS
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   
     /**** Done ****/
 
-    bc.validateBlock(0).then((result) => {
+    myBlockChain.validateBlock(0).then((result) => {
         c(result)
     })
 
@@ -74,7 +74,7 @@ MEETS SPECIFICATIONS
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
     /**** Done ****/
    
-    bc.validateChain()
+    myBlockChain.validateChain()
 
     result:
     No errors detected
@@ -109,5 +109,4 @@ MEETS SPECIFICATIONS
 ===========================================================================
 
 
-validateBlock() function to validate a block stored within levelDB
-
+ 
