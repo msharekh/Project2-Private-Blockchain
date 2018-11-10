@@ -6,58 +6,66 @@
 
 const SHA256 = require('crypto-js/sha256');
 
-
-
 const level = require('level');
 const chainDB = './chaindata';
 const db = level(chainDB);
+// this.db = level(chainDB);
 
 function c(txt){
   console.log(txt);
 }
 
 
-//---------((((((((((((((((((((((((((()))))))))))))))))))))))))))
 
+  
+  //---------((((((((((((((((((((((((((()))))))))))))))))))))))))))
+  
+  
+  //--------- Add data to levelDB with key/value pair
+  function addLevelDBData(key,value){
+    db.put(key, value, function(err) {
+      if (err) {
+        return ('Block ' + key + ' submission failed', err);
+        // reject('error in addLevelDBData')
 
-//--------- Add data to levelDB with key/value pair
-function addLevelDBData(key,value){
-  db.put(key, value, function(err) {
-    if (err) return console.log('Block ' + key + ' submission failed', err);
-    // getLevelDBData(key);
+      }else{
+        // getLevelDBData(key);
+      }
+      
+      
+    })
     
-  })
-  
-  
-}
-
-//--------- Get data from levelDB with key
-function getLevelDBData(key){
-  
-  return new Promise(function (resolve,reject){
     
-    db.get(key, function(err, value) {
-      if (err) return console.log('Not found!', err);     
-      resolve(value);
-    })   
-  });
-}
-
-//--------- Add data to levelDB with value
-function addDataToLevelDB(value) {
-  let i = 0;
-  db.createReadStream().on('data', function(data) {
-    i++;
-  }).on('error', function(err) {
-    return console.log('Unable to read data stream!', err)
-  }).on('close', function() {
-    console.log('Block #' + i);
-    addLevelDBData(i, value);
-  });
-}
-
-
-//--------((((((((((((((((((((((((((()))))))))))))))))))))))))))
+  }
+  
+  //--------- Get data from levelDB with key
+  function getLevelDBData(key){
+    
+    return new Promise(function (resolve,reject){
+      
+      db.get(key, function(err, value) {
+        if (err) return console.log('Not found!', err);     
+        resolve(value);
+      })   
+    });
+  }
+  
+  //--------- Add data to levelDB with value
+  function addDataToLevelDB(value) {
+    let i = 0;
+    db.createReadStream().on('data', function(data) {
+      i++;
+    }).on('error', function(err) {
+      return console.log('Unable to read data stream!', err)
+    }).on('close', function() {
+      console.log('Block #' + i);
+      addLevelDBData(i, value);
+    });
+  }
+  
+  
+  //--------((((((((((((((((((((((((((()))))))))))))))))))))))))))
+  
 
 /* ===== Block Class ===================================
 |  Class with a constructor for block data model       |
@@ -82,10 +90,8 @@ class BlockChain{
     // this.addBlock(new Block("First block in the chain - Genesis block"));
   }   
   
-  // Add new block
-  addBlockTest(newBlock){  
-    
-  }
+ 
+  
   
   
   
@@ -94,12 +100,13 @@ class BlockChain{
   ################################################*/
   addBlock(newBlock){  
     
+    let self = this;
     return new Promise(function(resolve,reject){
       
       
       // let h = 0;        
       
-      bc.getBlockHeight().then((h) => {   
+      self.getBlockHeight().then((h) => {   
         
         if(h>0){
           c('\n=============================') 
@@ -110,12 +117,13 @@ class BlockChain{
         
         /// Block height         
         newBlock.height = h;
-        let objBlock=[];
-        objBlock.push(newBlock)
-        objBlock.push(h)
+        // let objBlock=[];
+        // objBlock.push(newBlock)
+        // objBlock.push(h)
         
-        return objBlock;          
-      }).then((objBlock) => { 
+        // return objBlock;          
+      // }).catch(e => console.error(`.catch(${e})`)).then((objBlock) => { 
+      // .then((objBlock) => { 
         
         //*************** formating block *****************
         /*    objBlock:-
@@ -124,12 +132,13 @@ class BlockChain{
         -   objBlock[2]...........previousBlock
         */
         // UTC timestamp
-        c('objBlock\t'+objBlock)
-        let newBlock=objBlock[0];
+        // c('objBlock\t'+objBlock)
+        // let newBlock=objBlock[0];
         newBlock.time = new Date().getTime().toString().slice(0,-3);
         c('newBlock.time\t'+newBlock.time)
         
-        let h=objBlock[1]
+        // let h=objBlock[1]
+        //  h=objBlock[1]
         
         
         if(h>0)
@@ -137,18 +146,20 @@ class BlockChain{
           
           c('\nblock height >0 !!!!!!!!!!!!   = '+h);
           
-          // Block height
-          newBlock.height = h;
+          
           
           
           // previous block hash
-          bc.getBlock(h-1).then((previousBlock) => { 
+          self.getBlock(h-1).then((previousBlock) => { 
             
             c('previousBlock,,,,,\t'+previousBlock) 
             
             newBlock.previousBlockHash = JSON.parse((previousBlock)).hash; 
             c('previousBlock.hash\t'+JSON.parse((previousBlock)).hash);
             
+            // Block height
+            newBlock.height = h;
+
             //check existance of newBlock
             c(newBlock)
             
@@ -162,7 +173,7 @@ class BlockChain{
             // Adding block object to chain
             //*************** adding block to DB *****************
             addLevelDBData(h,newBlock)
-          }) 
+          }).catch(e => console.error(`.catch(${e})`)) 
         }
         else{
           newBlock.body=newBlock.body.toString()+' ***** GENESIS Block *****'
@@ -171,8 +182,8 @@ class BlockChain{
           newBlock.hash = SHA256(JSON.stringify(newBlock)).toString();
           c('GENESIS newBlock.hash\t'+newBlock.hash);
           
-
-
+          
+          
           //finally VERY IMPORTANT - stringify block
           newBlock=JSON.stringify(newBlock).toString();
           c(newBlock)
@@ -181,16 +192,16 @@ class BlockChain{
           addLevelDBData(0,newBlock)
           
         }
-        resolve('saved')
-        
-        
-      })
+        // resolve('saved')
+        resolve('okkkkkk.')
+
+      // })
       
       
       
     });
     
-    
+  }).catch(e => console.error(`.catch(${e})`))
     
     
   }
@@ -204,17 +215,23 @@ class BlockChain{
   ################ Get block height ################
   ################################################*/
   getBlockHeight(){
+
+    let self = this;
     return new Promise(function(resolve,reject){
       
       let h = 0;
+      let result =0
       db.createReadStream().on('data', function(data) {
         h++;
       }).on('error', function(err) {
-        return console.log('Unable to read data stream!', err)
+        console.log('Unable to read data stream!', err)
+        result=0;
+
       }).on('close', function() {
         // console.log('p BlockHeight\t' + h);
         resolve(h);
       })
+      // (result)
     })
   }
   
@@ -238,15 +255,16 @@ class BlockChain{
   ################ validate block  #################
   ################################################*/
   validateBlock(blockHeight){
-    
+    let self = this;
     return new Promise(function (resolve,reject){
       
       let result
       // get block chain
-      let bc = new BlockChain();
+      //let bc = new BlockChain();
       
       // get block object
-      bc.getBlock(blockHeight).then((b) => {  
+      
+      self.getBlock(blockHeight).then((b) => {  
         // let block=JSON.parse(block);
         let block=JSON.parse(b);
         // get block hash
@@ -270,7 +288,7 @@ class BlockChain{
         }
         resolve(result);
         
-      });
+      }).catch(e => console.error(`.catch(${e})`));
       // c(r);
       
       
@@ -284,13 +302,13 @@ class BlockChain{
   validateChain(){
     
     
-    
+    let self = this;
     
     let errorLog = [];
-    let bc = new BlockChain();
+    // let bc = new BlockChain();
     
     //get blockHieght
-    bc.getBlockHeight().then((h) => {
+    self.getBlockHeight().then((h) => {
       
       let result
       
@@ -301,14 +319,14 @@ class BlockChain{
           //validate blocks 
           c(i)        
           // let i=0
-          var promise_validateBlock = bc.validateBlock(i).then((result) => {
+          var promise_validateBlock = self.validateBlock(i).then((result) => {
             let isValidateBlock = result;
             c(i+' isValidateBlock\t'+result)
             
             return(result)
           })
           
-          var promise_getBlock = bc.getBlock(i).then((b) => {
+          var promise_getBlock = self.getBlock(i).then((b) => {
             let block=JSON.parse(b);
             let blockHash = block.hash;
             // c('blockHash\t'+blockHash)
@@ -318,7 +336,7 @@ class BlockChain{
             console.log('error'+error);
           });
           
-          var promise_getNextBlock = bc.getBlock(i+1).then((b) => {
+          var promise_getNextBlock = self.getBlock(i+1).then((b) => {
             let nextblock=JSON.parse(b);
             
             let previousHash = nextblock.previousBlockHash;
@@ -369,7 +387,7 @@ class BlockChain{
       
       
       
-    })
+    }).catch(e => console.error(`.catch(${e})`))
     
     // })
     
@@ -409,8 +427,8 @@ class BlockChain{
 
 
 //testing:
-let bc = new BlockChain();
 
+let bc = new BlockChain();
 
 function addTestBlock(){
   // let bc = new BlockChain(); 
@@ -443,26 +461,26 @@ function addTestBlock(){
 }
 
 
-function runTest2(){
+
+function runTest2(){ 
   
-  let bc = new BlockChain();
+  let myBlockChain = new BlockChain();
   
-  
-   
   (function theLoop (i) {
     setTimeout(function () {
       let blockTest = new Block("Test Block - " + (i + 1));
-      bc.addBlock(blockTest).then((result) => {
+      myBlockChain.addBlock(blockTest).then((result) => {
         console.log(result);
         i++;
         if (i < 10) theLoop(i);
-      });
-    }, 1000);
+      }).catch(e => console.error(`.catch(${e})`));
+    }, 10000);
   })(0);
   
   
   
 }
+
 
 
 // runTest2();
@@ -476,11 +494,16 @@ bc.validateChain()
 // c(bc.getBlockHeight().then((block) => {   
 //   c("getBlockHeight\t"+block);  
 // }));
+
+// bc.validateBlock(3).then((result) => {
+//    c(result)
+// })
+
 // addTestBlock();
 
 // bc.addBlock(new Block("First block in chain")).then((result) => {
 //   c("Block DB \t Genesis") ;
-// });
+// }).catch(e => console.error(`.addBlock catch(${e})`)) ;
 
 //bc.validateChain()
 
